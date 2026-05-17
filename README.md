@@ -205,7 +205,7 @@ Keep adapters pointed only at sources you are authorized to query.
 
 ### Host Your Own Feed on Vercel
 
-Yes. See `examples/vercel-json-feed` for a small Vercel serverless JSON feed backed by `data/awards.json`.
+Yes. See `examples/vercel-json-feed` for a small Vercel serverless JSON feed. It attempts a no-credential Award Flight Daily MCP search on each route/date request, then merges those live/cached leads with the local `data/awards.json` fallback.
 
 Deploy that folder as its own Vercel project, then copy `config/public-json-adapters.vercel.example.json`, replace the `baseUrl` with your deployed `/api/awards` URL, and set:
 
@@ -213,7 +213,7 @@ Deploy that folder as its own Vercel project, then copy `config/public-json-adap
 PUBLIC_JSON_ADAPTER_CONFIG=./config/public-json-adapters.vercel.example.json
 ```
 
-This is useful for hand-curated leads, data you export from another authorized provider, or a scheduled feed you own.
+This is useful for live no-key lookups, hand-curated leads, data you export from another authorized provider, or a scheduled feed you own. If the upstream free tier is capped, the feed returns a warning so the MCP caller can tell the difference between "no award space" and "source limit reached."
 
 ## Optional Local Feeds
 

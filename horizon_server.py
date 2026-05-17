@@ -33,6 +33,9 @@ SortDirection = Literal["asc", "desc"]
 LOCAL_AWARD_FEED_PATH = Path(os.getenv("LOCAL_AWARD_FEED_PATH", str(ROOT / "config" / "sample-awards.json")))
 PUBLIC_AWARD_FEED_URL = os.getenv("PUBLIC_AWARD_FEED_URL", "https://vercel-json-feed.vercel.app/api/awards").strip()
 PUBLIC_AWARD_FEED_ENABLED = os.getenv("PUBLIC_AWARD_FEED_ENABLED", "true").lower() in {"1", "true", "yes", "on"}
+AWARD_FLIGHT_DAILY_ENABLED = os.getenv("AWARD_FLIGHT_DAILY_ENABLED", "true").lower() in {"1", "true", "yes", "on"}
+AWARD_FLIGHT_DAILY_MCP_URL = os.getenv("AWARD_FLIGHT_DAILY_MCP_URL", "https://awardflightdaily.com/mcp-server/mcp").strip()
+AWARD_FLIGHT_DAILY_API_KEY = os.getenv("AWARD_FLIGHT_DAILY_API_KEY", "").strip()
 TRANSFER_BONUSES_PATH = Path(os.getenv("TRANSFER_BONUSES_PATH", str(ROOT / "config" / "transfer-bonuses.json")))
 AWARD_HISTORY_PATH = Path(os.getenv("AWARD_HISTORY_PATH", str(DATA_DIR / "history.json")))
 AWARD_ALERTS_PATH = Path(os.getenv("AWARD_ALERTS_PATH", str(DATA_DIR / "alerts.json")))
@@ -556,6 +559,24 @@ def source_status() -> dict[str, Any]:
     return {
         "sources": [
             {
+                "id": "award-flight-daily",
+                "name": "Award Flight Daily MCP",
+                "kind": "partner_api",
+                "health": "ready" if AWARD_FLIGHT_DAILY_ENABLED and AWARD_FLIGHT_DAILY_MCP_URL else "disabled",
+                "message": (
+                    "No-key remote MCP source enabled. Free tier may be rate-limited."
+                    if AWARD_FLIGHT_DAILY_ENABLED and AWARD_FLIGHT_DAILY_MCP_URL and not AWARD_FLIGHT_DAILY_API_KEY
+                    else "Remote MCP source enabled with API key."
+                    if AWARD_FLIGHT_DAILY_ENABLED and AWARD_FLIGHT_DAILY_MCP_URL
+                    else "Disabled with AWARD_FLIGHT_DAILY_ENABLED=false or empty AWARD_FLIGHT_DAILY_MCP_URL."
+                ),
+                "supportsLive": False,
+                "supportsCached": True,
+                "supportsBatch": False,
+                "supportsExplore": False,
+                "rateLimitMs": 1000,
+            },
+            {
                 "id": "local-award-feed",
                 "name": "Local Award JSON Feed",
                 "kind": "manual",
@@ -583,6 +604,7 @@ def source_status() -> dict[str, Any]:
         "cache": {"type": "stateless"},
         "feeds": {
             "localAwardFeedPath": str(LOCAL_AWARD_FEED_PATH),
+            "awardFlightDailyMcpUrl": AWARD_FLIGHT_DAILY_MCP_URL,
             "publicAwardFeedUrl": PUBLIC_AWARD_FEED_URL,
             "historyPath": str(AWARD_HISTORY_PATH),
             "alertsPath": str(AWARD_ALERTS_PATH),
@@ -1054,6 +1076,18 @@ def _run_award_search(search: dict[str, Any], started: float) -> dict[str, Any]:
     attempted_queries = 0
     results: list[dict[str, Any]] = []
 
+    if AWARD_FLIGHT_DAILY_ENABLED and AWARD_FLIGHT_DAILY_MCP_URL:
+        afd_results, afd_warnings, afd_queries = _search_award_flight_daily(search)
+        attempted_queries += afd_queries
+        warnings.extend(afd_warnings)
+        if afd_results:
+            adapters_used.append("award-flight-daily")
+            results.extend(afd_results)
+        else:
+            skipped.append(_source_skip("award-flight-daily", "No normalized Award Flight Daily results."))
+    else:
+        skipped.append(_source_skip("award-flight-daily", "Disabled or missing AWARD_FLIGHT_DAILY_MCP_URL.", health="disabled"))
+
     local_results, local_warnings = _search_local_feed(search)
     warnings.extend(local_warnings)
     if local_results:
@@ -1086,6 +1120,247 @@ def _run_award_search(search: dict[str, Any], started: float) -> dict[str, Any]:
         "elapsedMs": round((time.time() - started) * 1000),
     }
     return {"results": sorted_results, "diagnostics": diagnostics}
+
+
+def _search_award_flight_daily(search: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str], int]:
+    warnings: list[str] = []
+    results: list[dict[str, Any]] = []
+    queries = _build_afd_queries(search)
+    for query in queries:
+        try:
+            payload = _call_remote_mcp_tool(AWARD_FLIGHT_DAILY_MCP_URL, "afd_search_award_flights", {"params": query}, AWARD_FLIGHT_DAILY_API_KEY)
+            message = _payload_message(payload)
+            if message and not _extract_items(payload):
+                warnings.append(f"award-flight-daily returned: {message}")
+                continue
+            found_at = _now()
+            for item in _extract_items(payload):
+                result = _normalize_afd_award(
+                    item,
+                    found_at=found_at,
+                    default_origin=query.get("origin", ""),
+                    default_destination=query.get("destination", ""),
+                    default_date=query.get("date_from", search["startDate"]),
+                    default_cabin=_from_afd_cabin(query.get("cabin")),
+                )
+                if _matches_award_search(result, search):
+                    results.append(result)
+        except Exception as exc:  # noqa: BLE001 - surface upstream/source failures to the caller.
+            warnings.append(f"award-flight-daily request failed: {exc}")
+    if not results and not warnings:
+        warnings.append("award-flight-daily returned no normalized award availability for this query.")
+    return results, warnings, len(queries)
+
+
+def _build_afd_queries(search: dict[str, Any]) -> list[dict[str, Any]]:
+    cabins = search.get("cabins") or [None]
+    brute = search.get("bruteForce") or {}
+    max_queries = min(int(brute.get("maxQueries", 2000)), 2000)
+    queries = []
+    for origin in search["origins"]:
+        for destination in search["destinations"]:
+            for cabin in cabins:
+                query = _compact_dict(
+                    {
+                        "origin": origin,
+                        "destination": destination,
+                        "date_from": search["startDate"],
+                        "date_to": search["endDate"],
+                        "cabin": _to_afd_cabin(cabin) if cabin else None,
+                        "source": ",".join(search.get("programs") or []) or None,
+                        "direct_only": search.get("onlyDirectFlights", False),
+                        "max_miles": search.get("maxMileageCost"),
+                        "min_seats": search.get("minSeats") or search.get("passengers") or 1,
+                        "limit": min(200, max(1, int(search.get("maxResults") or 50))),
+                        "offset": 0,
+                        "response_format": "json",
+                    }
+                )
+                queries.append(query)
+                if len(queries) >= max_queries:
+                    return queries
+    return queries
+
+
+def _normalize_afd_award(
+    raw: dict[str, Any],
+    found_at: str,
+    default_origin: str,
+    default_destination: str,
+    default_date: str,
+    default_cabin: str | None,
+) -> dict[str, Any]:
+    origin = _string(raw.get("origin") or raw.get("from")) or default_origin
+    destination = _string(raw.get("destination") or raw.get("to")) or default_destination
+    date = (_string(raw.get("date") or raw.get("departure_date")) or default_date)[:10]
+    cabin = _from_afd_cabin(_string(raw.get("cabin") or raw.get("cabin_class"))) or default_cabin
+    flight_numbers = _split_flight_numbers(_string(raw.get("flight_number") or raw.get("flightNumbers") or raw.get("flight_numbers")))
+    result = {
+        "id": _stable_id(["award-flight-daily", raw.get("program") or raw.get("source"), origin, destination, date, cabin, raw.get("award_cost") or raw.get("miles") or raw.get("mileage")]),
+        "source": "award-flight-daily",
+        "sourceKind": "partner_api",
+        "sourceUpdatedAt": _string(raw.get("updated_at") or raw.get("updatedAt")),
+        "foundAt": found_at,
+        "confidence": "medium",
+        "program": _string(raw.get("program_name") or raw.get("program") or raw.get("source") or raw.get("loyalty_program")),
+        "origin": origin.upper(),
+        "destination": destination.upper(),
+        "date": date,
+        "cabin": cabin,
+        "seats": _optional_number(raw.get("seats") or raw.get("remaining_seats") or raw.get("availability_count")),
+        "mileageCost": _optional_number(raw.get("award_cost") or raw.get("miles") or raw.get("mileage") or raw.get("mileage_cost")),
+        "taxes": _optional_number(raw.get("taxes") or raw.get("fees")),
+        "taxesCurrency": _string(raw.get("taxes_currency") or raw.get("currency")),
+        "durationMinutes": _optional_number(raw.get("duration_minutes") or raw.get("duration")),
+        "stops": _optional_number(raw.get("stops")) if raw.get("stops") is not None else _infer_stops(raw.get("direct")),
+        "marketingAirline": _string(raw.get("airline_name") or raw.get("airline") or raw.get("airlines") or raw.get("marketing_airline")),
+        "operatingAirline": _string(raw.get("operating_airline")),
+        "flightNumbers": flight_numbers,
+        "aircraft": _string(raw.get("equipment") or raw.get("aircraft")),
+        "segments": [],
+        "warnings": ["Cached Award Flight Daily result. Verify availability on the loyalty program website before transferring points."],
+        "raw": raw,
+    }
+    return _compact_dict(result)
+
+
+def _call_remote_mcp_tool(url: str, tool_name: str, arguments: dict[str, Any], api_key: str | None = None) -> Any:
+    headers = {"user-agent": "award-flights-mcp-horizon/0.1"}
+    if api_key:
+        headers["authorization"] = f"Bearer {api_key}"
+        headers["x-api-key"] = api_key
+
+    initialize_headers, _ = _post_mcp_json(
+        url,
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-06-18",
+                "capabilities": {},
+                "clientInfo": {"name": "award-flights-mcp-horizon", "version": "0.1.0"},
+            },
+        },
+        headers,
+    )
+    session_id = initialize_headers.get("mcp-session-id") or initialize_headers.get("Mcp-Session-Id")
+    with contextlib.suppress(Exception):
+        _post_mcp_json(url, {"jsonrpc": "2.0", "method": "notifications/initialized"}, headers, session_id=session_id)
+    _, response = _post_mcp_json(
+        url,
+        {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": tool_name, "arguments": arguments}},
+        headers,
+        session_id=session_id,
+    )
+    return _extract_mcp_payload(response)
+
+
+def _post_mcp_json(url: str, payload: dict[str, Any], headers: dict[str, str] | None = None, session_id: str | None = None) -> tuple[dict[str, str], Any]:
+    request_headers = {
+        "accept": "application/json, text/event-stream",
+        "content-type": "application/json",
+        **(headers or {}),
+    }
+    if session_id:
+        request_headers["mcp-session-id"] = session_id
+    request = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=request_headers)
+    with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310 - URL is configured by the server owner.
+        body = response.read().decode("utf-8")
+        return dict(response.headers.items()), _parse_mcp_body(body)
+
+
+def _parse_mcp_body(body: str) -> Any:
+    text = body.strip()
+    if not text:
+        return {}
+    if text.startswith("event:") or "\ndata:" in text:
+        for line in text.splitlines():
+            if line.startswith("data:"):
+                return json.loads(line[5:].strip())
+    return json.loads(text)
+
+
+def _extract_mcp_payload(response: Any) -> Any:
+    record = response if isinstance(response, dict) else {}
+    result = record.get("result")
+    if isinstance(result, dict):
+        structured = result.get("structuredContent")
+        if isinstance(structured, dict):
+            unwrapped = _unwrap_result(structured)
+            return structured if unwrapped is None else unwrapped
+        unwrapped = _unwrap_result(result)
+        if unwrapped is not None:
+            return unwrapped
+        for content in result.get("content") or []:
+            if isinstance(content, dict) and content.get("type") == "text":
+                parsed = _parse_json_text(_string(content.get("text")) or "")
+                if parsed is not None:
+                    return parsed
+                return {"message": content.get("text")}
+    return response
+
+
+def _unwrap_result(record: dict[str, Any]) -> Any:
+    if "result" not in record:
+        return None
+    value = record.get("result")
+    if isinstance(value, str):
+        parsed = _parse_json_text(value)
+        return parsed if parsed is not None else {"message": value}
+    return value
+
+
+def _parse_json_text(text: str) -> Any:
+    stripped = text.strip()
+    candidates = [stripped]
+    fenced = re.search(r"```(?:json)?\s*([\s\S]*?)```", stripped)
+    if fenced:
+        candidates.append(fenced.group(1))
+    embedded = re.search(r"(\{[\s\S]*\}|\[[\s\S]*\])", stripped)
+    if embedded:
+        candidates.append(embedded.group(1))
+    for candidate in candidates:
+        if not candidate:
+            continue
+        with contextlib.suppress(Exception):
+            return json.loads(candidate)
+    return None
+
+
+def _payload_message(payload: Any) -> str | None:
+    if isinstance(payload, dict):
+        return _string(payload.get("error") or payload.get("message") or payload.get("detail") or payload.get("result"))
+    return _string(payload)
+
+
+def _to_afd_cabin(cabin: str | None) -> str | None:
+    if cabin == "economy":
+        return "Y"
+    if cabin == "premium":
+        return "W"
+    if cabin == "business":
+        return "J"
+    if cabin == "first":
+        return "F"
+    return None
+
+
+def _from_afd_cabin(value: str | None) -> str | None:
+    normalized = (value or "").strip().upper()
+    if normalized in {"Y", "ECONOMY"}:
+        return "economy"
+    if normalized in {"W", "PREMIUM", "PREMIUM_ECONOMY"}:
+        return "premium"
+    if normalized in {"J", "BUSINESS"}:
+        return "business"
+    if normalized in {"F", "FIRST"}:
+        return "first"
+    return None
+
+
+def _infer_stops(value: Any) -> int | None:
+    return 0 if value is True else 1 if value is False else None
 
 
 def _search_local_feed(search: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
@@ -1711,16 +1986,17 @@ def _result_key(result: dict[str, Any]) -> str:
 
 
 def _source_skip(source_id: str, message: str, health: str = "ready") -> dict[str, Any]:
+    source_kind = "partner_api" if source_id == "award-flight-daily" else "public_json" if source_id == "public-award-feed" else "manual"
     return {
         "id": source_id,
         "name": source_id.replace("-", " ").title(),
-        "kind": "public_json" if source_id == "public-award-feed" else "manual",
+        "kind": source_kind,
         "health": health,
         "message": message,
         "supportsLive": False,
         "supportsCached": True,
         "supportsBatch": source_id == "local-award-feed",
-        "supportsExplore": True,
+        "supportsExplore": source_id != "award-flight-daily",
     }
 
 
