@@ -1,0 +1,13 @@
+{
+  "name": "award-flights-json-feed",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod"
+  },
+  "devDependencies": {
+    "vercel": "^48.0.0"
+  }
+}

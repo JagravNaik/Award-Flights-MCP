@@ -1,0 +1,19 @@
+[
+  {
+    "id": "example-park-hyatt-2026-09-10",
+    "source": "manual-example",
+    "foundAt": "2026-05-17T00:00:00.000Z",
+    "hotelName": "Example Park Hyatt",
+    "location": "Paris, France",
+    "program": "World of Hyatt",
+    "checkIn": "2026-09-10",
+    "checkOut": "2026-09-12",
+    "pointsPerNight": 35000,
+    "cashRate": 970,
+    "cashCurrency": "USD",
+    "centsPerPoint": 2.77,
+    "roomName": "Standard Room",
+    "bookingUrl": "https://www.hyatt.com/",
+    "warnings": ["Example only. Replace with data from an authorized hotel award feed."]
+  }
+]

@@ -1,0 +1,37 @@
+services:
+  award-flights-mcp:
+    build: .
+    environment:
+      MCP_TRANSPORT: http
+      MCP_HTTP_PORT: "3000"
+      LOCAL_AWARD_FEED_ENABLED: ${LOCAL_AWARD_FEED_ENABLED:-true}
+      LOCAL_AWARD_FEED_PATH: ${LOCAL_AWARD_FEED_PATH:-/app/config/sample-awards.json}
+      SEATS_AERO_ENABLED: ${SEATS_AERO_ENABLED:-false}
+      SEATS_AERO_API_KEY: ${SEATS_AERO_API_KEY:-}
+      AEROBASE_ENABLED: ${AEROBASE_ENABLED:-false}
+      AEROBASE_API_KEY: ${AEROBASE_API_KEY:-}
+      AEROBASE_API_BASE_URL: ${AEROBASE_API_BASE_URL:-https://aerobase.app/api}
+      AWARD_FLIGHT_DAILY_ENABLED: ${AWARD_FLIGHT_DAILY_ENABLED:-true}
+      AWARD_FLIGHT_DAILY_API_KEY: ${AWARD_FLIGHT_DAILY_API_KEY:-}
+      AWARD_FLIGHT_DAILY_MCP_URL: ${AWARD_FLIGHT_DAILY_MCP_URL:-https://awardflightdaily.com/mcp-server/mcp}
+      AWARD_TRAVEL_FINDER_ENABLED: ${AWARD_TRAVEL_FINDER_ENABLED:-false}
+      AWARD_TRAVEL_FINDER_API_KEY: ${AWARD_TRAVEL_FINDER_API_KEY:-}
+      AWARD_TRAVEL_FINDER_API_BASE_URL: ${AWARD_TRAVEL_FINDER_API_BASE_URL:-https://awardtravelfinder.com/api/v1}
+      AWARD_TRAVEL_FINDER_AIRLINES: ${AWARD_TRAVEL_FINDER_AIRLINES:-british_airways,qatar,cathay_pacific,virgin_atlantic}
+      APIFY_FLIGHT_AWARD_ENABLED: ${APIFY_FLIGHT_AWARD_ENABLED:-false}
+      APIFY_API_TOKEN: ${APIFY_API_TOKEN:-}
+      APIFY_FLIGHT_AWARD_ACTOR_ID: ${APIFY_FLIGHT_AWARD_ACTOR_ID:-igolaizola/flight-award-scraper}
+      APIFY_FLIGHT_AWARD_MAX_ITEMS: ${APIFY_FLIGHT_AWARD_MAX_ITEMS:-100}
+      PUBLIC_JSON_ADAPTER_CONFIG: /app/config/public-json-adapters.example.json
+      AWARD_ALERTS_PATH: /app/data/alerts.json
+      AWARD_HISTORY_PATH: /app/data/history.json
+      AWARD_POINTS_WALLET_PATH: /app/data/points-wallet.json
+      HOTEL_RESULTS_PATH: ${HOTEL_RESULTS_PATH:-/app/config/hotel-results.example.json}
+      HOTEL_ALERTS_PATH: /app/data/hotel-alerts.json
+      TRANSFER_BONUSES_PATH: ${TRANSFER_BONUSES_PATH:-/app/config/transfer-bonuses.json}
+      SEAT_MAPS_PATH: ${SEAT_MAPS_PATH:-/app/config/seat-maps.example.json}
+      FARE_CLASSES_PATH: ${FARE_CLASSES_PATH:-/app/config/fare-classes.example.json}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data

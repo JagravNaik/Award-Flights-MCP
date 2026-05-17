@@ -1,0 +1,47 @@
+{
+  "updatedAt": "2026-05-17T00:00:00.000Z",
+  "results": [
+    {
+      "id": "sample-jfk-lhr-aa-2026-06-10-j",
+      "program": "American AAdvantage",
+      "airline": "AA",
+      "flight_numbers": "AA100",
+      "origin": "JFK",
+      "destination": "LHR",
+      "date": "2026-06-10",
+      "cabin": "business",
+      "miles": 57500,
+      "taxes": {
+        "amount": 5.6,
+        "currency": "USD"
+      },
+      "seats": 2,
+      "aircraft": "Boeing 777-300ER",
+      "fare_class": "U",
+      "departure": "2026-06-10T18:10:00-04:00",
+      "arrival": "2026-06-11T06:30:00+01:00",
+      "booking_url": "https://www.aa.com/booking/search"
+    },
+    {
+      "id": "sample-lax-nrt-ana-2026-06-12-f",
+      "program": "Virgin Atlantic Flying Club",
+      "airline": "NH",
+      "flight_numbers": "NH105",
+      "origin": "LAX",
+      "destination": "HND",
+      "date": "2026-06-12",
+      "cabin": "first",
+      "miles": 72500,
+      "taxes": {
+        "amount": 62.1,
+        "currency": "USD"
+      },
+      "seats": 1,
+      "aircraft": "Boeing 777-300ER",
+      "fare_class": "O",
+      "departure": "2026-06-12T01:20:00-07:00",
+      "arrival": "2026-06-13T05:00:00+09:00",
+      "booking_url": "https://www.virginatlantic.com/"
+    }
+  ]
+}

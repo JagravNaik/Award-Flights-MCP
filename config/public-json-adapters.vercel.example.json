@@ -1,0 +1,45 @@
+{
+  "adapters": [
+    {
+      "id": "vercel-award-feed",
+      "name": "Vercel Hosted Award Feed",
+      "enabled": true,
+      "baseUrl": "https://your-award-feed.vercel.app/api/awards",
+      "method": "GET",
+      "rateLimitMs": 500,
+      "query": {
+        "origin": "{{origin}}",
+        "destination": "{{destination}}",
+        "date": "{{date}}",
+        "startDate": "{{startDate}}",
+        "endDate": "{{endDate}}",
+        "cabin": "{{cabin}}",
+        "passengers": "{{passengers}}",
+        "programs": "{{programs}}"
+      },
+      "headers": {
+        "accept": "application/json"
+      },
+      "resultsPath": "results",
+      "fieldMap": {
+        "id": "id",
+        "origin": "origin",
+        "destination": "destination",
+        "date": "date",
+        "program": "program",
+        "marketingAirline": "airline",
+        "flightNumbers": "flight_numbers",
+        "mileageCost": "miles",
+        "taxes": "taxes.amount",
+        "taxesCurrency": "taxes.currency",
+        "seats": "seats",
+        "cabin": "cabin",
+        "aircraft": "aircraft",
+        "fareClass": "fare_class",
+        "departsAt": "departure",
+        "arrivesAt": "arrival",
+        "bookingUrl": "booking_url"
+      }
+    }
+  ]
+}

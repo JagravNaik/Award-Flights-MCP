@@ -1,0 +1,12 @@
+[
+  {
+    "id": "example-amex-flying-blue",
+    "bank": "American Express Membership Rewards",
+    "program": "Air France-KLM Flying Blue",
+    "bonusPercent": 20,
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-31",
+    "source": "https://example.com/current-transfer-bonus",
+    "notes": "Example only. Replace with a current, verified bonus feed."
+  }
+]

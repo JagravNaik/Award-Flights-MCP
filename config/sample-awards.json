@@ -1,0 +1,183 @@
+{
+  "updated_at": "2026-05-17T00:00:00.000Z",
+  "source": "sample-local-feed",
+  "notice": "Credential-free sample award leads for local development. Replace with a feed you own before relying on results.",
+  "results": [
+    {
+      "id": "sample-jfk-lhr-ba-business-2026-06-10",
+      "origin": "JFK",
+      "destination": "LHR",
+      "date": "2026-06-10",
+      "program": "British Airways Executive Club",
+      "airline": "British Airways",
+      "operating_airline": "British Airways",
+      "flight_numbers": "BA112",
+      "miles": 57500,
+      "taxes": {
+        "amount": 731.2,
+        "currency": "USD"
+      },
+      "cash_price": {
+        "amount": 4050,
+        "currency": "USD"
+      },
+      "cpp": 5.77,
+      "seats": 2,
+      "cabin": "business",
+      "aircraft": "777-300ER",
+      "fare_class": "U",
+      "departure": "2026-06-10T18:00:00-04:00",
+      "arrival": "2026-06-11T06:20:00+01:00",
+      "duration_minutes": 440,
+      "stops": 0,
+      "booking_url": "https://www.britishairways.com/travel/redeem/execclub/_gf/en_us",
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "LHR",
+          "marketingAirline": "British Airways",
+          "operatingAirline": "British Airways",
+          "flightNumber": "BA112",
+          "aircraft": "777-300ER",
+          "cabin": "business",
+          "departsAt": "2026-06-10T18:00:00-04:00",
+          "arrivesAt": "2026-06-11T06:20:00+01:00",
+          "durationMinutes": 440,
+          "fareClass": "U"
+        }
+      ]
+    },
+    {
+      "id": "sample-jfk-lhr-aa-business-2026-06-12",
+      "origin": "JFK",
+      "destination": "LHR",
+      "date": "2026-06-12",
+      "program": "American AAdvantage",
+      "airline": "American Airlines",
+      "operating_airline": "American Airlines",
+      "flight_numbers": "AA100",
+      "miles": 57500,
+      "taxes": {
+        "amount": 5.6,
+        "currency": "USD"
+      },
+      "cash_price": {
+        "amount": 3890,
+        "currency": "USD"
+      },
+      "cpp": 6.76,
+      "seats": 1,
+      "cabin": "business",
+      "aircraft": "777-200",
+      "fare_class": "U",
+      "departure": "2026-06-12T18:35:00-04:00",
+      "arrival": "2026-06-13T06:55:00+01:00",
+      "duration_minutes": 440,
+      "stops": 0,
+      "booking_url": "https://www.aa.com/booking/find-flights",
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "LHR",
+          "marketingAirline": "American Airlines",
+          "operatingAirline": "American Airlines",
+          "flightNumber": "AA100",
+          "aircraft": "777-200",
+          "cabin": "business",
+          "departsAt": "2026-06-12T18:35:00-04:00",
+          "arrivesAt": "2026-06-13T06:55:00+01:00",
+          "durationMinutes": 440,
+          "fareClass": "U"
+        }
+      ]
+    },
+    {
+      "id": "sample-ewr-cdg-ua-economy-2026-07-04",
+      "origin": "EWR",
+      "destination": "CDG",
+      "date": "2026-07-04",
+      "program": "United MileagePlus",
+      "airline": "United Airlines",
+      "operating_airline": "United Airlines",
+      "flight_numbers": "UA57",
+      "miles": 33000,
+      "taxes": {
+        "amount": 5.6,
+        "currency": "USD"
+      },
+      "cash_price": {
+        "amount": 870,
+        "currency": "USD"
+      },
+      "cpp": 2.62,
+      "seats": 4,
+      "cabin": "economy",
+      "aircraft": "767-300",
+      "fare_class": "XN",
+      "departure": "2026-07-04T18:20:00-04:00",
+      "arrival": "2026-07-05T07:55:00+02:00",
+      "duration_minutes": 455,
+      "stops": 0,
+      "booking_url": "https://www.united.com/en/us/book-flight/united-reservations",
+      "segments": [
+        {
+          "origin": "EWR",
+          "destination": "CDG",
+          "marketingAirline": "United Airlines",
+          "operatingAirline": "United Airlines",
+          "flightNumber": "UA57",
+          "aircraft": "767-300",
+          "cabin": "economy",
+          "departsAt": "2026-07-04T18:20:00-04:00",
+          "arrivesAt": "2026-07-05T07:55:00+02:00",
+          "durationMinutes": 455,
+          "fareClass": "XN"
+        }
+      ]
+    },
+    {
+      "id": "sample-lax-nrt-jl-business-2026-08-20",
+      "origin": "LAX",
+      "destination": "NRT",
+      "date": "2026-08-20",
+      "program": "Alaska Mileage Plan",
+      "airline": "Japan Airlines",
+      "operating_airline": "Japan Airlines",
+      "flight_numbers": "JL61",
+      "miles": 60000,
+      "taxes": {
+        "amount": 19.8,
+        "currency": "USD"
+      },
+      "cash_price": {
+        "amount": 5120,
+        "currency": "USD"
+      },
+      "cpp": 8.5,
+      "seats": 2,
+      "cabin": "business",
+      "aircraft": "787-9",
+      "fare_class": "U",
+      "departure": "2026-08-20T13:05:00-07:00",
+      "arrival": "2026-08-21T16:55:00+09:00",
+      "duration_minutes": 710,
+      "stops": 0,
+      "booking_url": "https://www.alaskaair.com/booking/flights",
+      "segments": [
+        {
+          "origin": "LAX",
+          "destination": "NRT",
+          "marketingAirline": "Japan Airlines",
+          "operatingAirline": "Japan Airlines",
+          "flightNumber": "JL61",
+          "aircraft": "787-9",
+          "cabin": "business",
+          "departsAt": "2026-08-20T13:05:00-07:00",
+          "arrivesAt": "2026-08-21T16:55:00+09:00",
+          "durationMinutes": 710,
+          "fareClass": "U"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "amex-membership-rewards-hilton-honors-2026-04-28",
+    "bank": "American Express Membership Rewards",
+    "program": "Hilton Honors",
+    "bonusPercent": 20,
+    "startDate": "2026-04-28",
+    "endDate": "2026-05-30",
+    "source": "https://www.nerdwallet.com/travel/learn/credit-card-transfer-bonuses",
+    "notes": "Active as of 2026-05-17. Base ratio is typically 1:2, so this offer is commonly shown as 1,000 Membership Rewards -> 2,400 Hilton Honors points. Verify in Amex before transfer."
+  },
+  {
+    "id": "capital-one-miles-qantas-frequent-flyer-2026-05-01",
+    "bank": "Capital One Miles",
+    "program": "Qantas Frequent Flyer",
+    "bonusPercent": 20,
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-31",
+    "source": "https://www.nerdwallet.com/travel/learn/credit-card-transfer-bonuses",
+    "notes": "Active as of 2026-05-17. Commonly shown as 1,000 Capital One miles -> 1,200 Qantas points. Verify in Capital One before transfer."
+  },
+  {
+    "id": "chase-ultimate-rewards-flying-blue-2026-05-01",
+    "bank": "Chase Ultimate Rewards",
+    "program": "Air France-KLM Flying Blue",
+    "bonusPercent": 20,
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-27",
+    "source": "https://roame.travel/guides/points-transfer-bonuses",
+    "notes": "Active as of 2026-05-17. Commonly shown as 1,000 Ultimate Rewards -> 1,200 Flying Blue miles. Verify in Chase before transfer."
+  },
+  {
+    "id": "chase-ultimate-rewards-southwest-rapid-rewards-2026-05-15",
+    "bank": "Chase Ultimate Rewards",
+    "program": "Southwest Rapid Rewards",
+    "bonusPercent": 30,
+    "startDate": "2026-05-15",
+    "endDate": "2026-06-05",
+    "source": "https://frequentmiler.com/30-transfer-bonus-from-chase-ultimate-rewards-to-southwest-rapid-rewards/",
+    "notes": "Active as of 2026-05-17. Terms cited by multiple trackers say transfers submitted through 11:59 PM ET on June 5, 2026 qualify; some trackers display this as expiring June 6. Bonus points may take up to 7 days and do not count toward Companion Pass or tier qualification."
+  },
+  {
+    "id": "chase-ultimate-rewards-marriott-bonvoy-2026-05-16",
+    "bank": "Chase Ultimate Rewards",
+    "program": "Marriott Bonvoy",
+    "bonusPercent": 55,
+    "startDate": "2026-05-16",
+    "endDate": "2026-06-30",
+    "source": "https://frequentmiler.com/chase-ultimate-rewards-offering-65-transfer-bonus-to-marriott/",
+    "notes": "Active as of 2026-05-17. This is the post-early-bird rate after the 65% Chase-Marriott bonus ended May 15. Commonly shown as 1,000 Ultimate Rewards -> 1,550 Marriott Bonvoy points. Verify in Chase before transfer."
+  }
+]

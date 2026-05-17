@@ -1,0 +1,42 @@
+{
+  "adapters": [
+    {
+      "id": "example-public-json",
+      "name": "Example Public JSON Adapter",
+      "enabled": false,
+      "baseUrl": "https://example.com/award-search",
+      "method": "GET",
+      "rateLimitMs": 1000,
+      "query": {
+        "origin": "{{origin}}",
+        "destination": "{{destination}}",
+        "date": "{{date}}",
+        "cabin": "{{cabin}}",
+        "passengers": "{{passengers}}"
+      },
+      "headers": {
+        "accept": "application/json"
+      },
+      "resultsPath": "results",
+      "fieldMap": {
+        "program": "program",
+        "marketingAirline": "airline",
+        "flightNumbers": "flight_numbers",
+        "mileageCost": "miles",
+        "taxes": "taxes.amount",
+        "taxesCurrency": "taxes.currency",
+        "cashPrice": "cash_price.amount",
+        "cashCurrency": "cash_price.currency",
+        "centsPerPoint": "cpp",
+        "seats": "seats",
+        "cabin": "cabin",
+        "aircraft": "aircraft",
+        "fareClass": "fare_class",
+        "premiumCabinPercent": "premium_cabin_percent",
+        "departsAt": "departure",
+        "arrivesAt": "arrival",
+        "bookingUrl": "booking_url"
+      }
+    }
+  ]
+}

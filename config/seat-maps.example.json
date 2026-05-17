@@ -1,0 +1,17 @@
+[
+  {
+    "id": "example-ba112-2026-09-10",
+    "source": "manual-example",
+    "airline": "British Airways",
+    "flightNumber": "BA112",
+    "date": "2026-09-10",
+    "aircraft": "777-300ER",
+    "cabin": "business",
+    "seatMapUrl": "https://example.com/seat-map",
+    "seats": [
+      { "seat": "10A", "status": "available" },
+      { "seat": "10K", "status": "blocked", "notes": "Example data" }
+    ],
+    "warnings": ["Example only. Replace with authorized seat-map data."]
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "example-ba112-u-2026-09-10",
+    "source": "manual-example",
+    "airline": "British Airways",
+    "flightNumber": "BA112",
+    "date": "2026-09-10",
+    "cabin": "business",
+    "fareClass": "U",
+    "seats": 2,
+    "awardBucket": true,
+    "notes": "Example only. Replace with authorized fare-class data."
+  }
+]
