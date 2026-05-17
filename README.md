@@ -129,6 +129,31 @@ HTTP endpoint:
 http://localhost:3000/mcp
 ```
 
+## Private Browser Collector
+
+For a private OCI server, run the browser collector as a separate Docker container. It uses Playwright with a persistent Chromium profile, searches configured routes, captures award-like JSON responses or rendered calendar cards from supported no-login pages, and writes a normalized feed to `data/collector-awards.json`.
+
+Run a one-shot collection:
+
+```bash
+docker compose --profile collector run --rm award-flights-collector
+```
+
+Use the collected feed in the MCP server:
+
+```bash
+LOCAL_AWARD_FEED_PATH=/app/data/collector-awards.json docker compose up --build award-flights-mcp
+```
+
+Configure routes in `config/collector-routes.example.json` or point `COLLECTOR_ROUTES_PATH` at your own mounted JSON file. You can also use `COLLECTOR_ROUTES_JSON` or `COLLECTOR_ORIGIN`, `COLLECTOR_DESTINATION`, `COLLECTOR_START_DATE`, and `COLLECTOR_END_DATE`.
+
+Current collector adapters:
+
+- `ba-reward-flight-finder`: best-effort no-login BA reward flight finder collection; reports holding-page/timeouts instead of bypassing controls.
+- `virgin-reward-seat-checker`: no-login Virgin Atlantic Reward Seat Checker collection, including rendered monthly calendar points.
+
+This collector is intentionally conservative: it does not bypass captchas, evade bot defenses, rotate proxies, or automate credential misuse. Keep it private, run it slowly, and use it only for searches you are authorized to perform. If a site changes its UI, debug screenshots and HTML are written under `data/collector-debug`.
+
 ## Prefect Horizon
 
 Horizon Deploy expects a Python FastMCP server object. This repo includes a Horizon-compatible entrypoint in `horizon_server.py` that runs without credentials and exposes the award-search, planning, transfer-bonus, alert, hotel, seat-map, fare-class, wallet, and history tools from JSON feeds.

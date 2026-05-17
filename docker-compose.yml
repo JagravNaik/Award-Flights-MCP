@@ -35,3 +35,22 @@ services:
       - "3000:3000"
     volumes:
       - ./data:/app/data
+
+  award-flights-collector:
+    profiles: ["collector"]
+    build:
+      context: .
+      dockerfile: Dockerfile.collector
+    environment:
+      COLLECTOR_ADAPTERS: ${COLLECTOR_ADAPTERS:-ba-reward-flight-finder,virgin-reward-seat-checker}
+      COLLECTOR_ROUTES_PATH: ${COLLECTOR_ROUTES_PATH:-/app/config/collector-routes.example.json}
+      COLLECTOR_HEADLESS: ${COLLECTOR_HEADLESS:-true}
+      COLLECTOR_INTERVAL_MINUTES: ${COLLECTOR_INTERVAL_MINUTES:-0}
+      COLLECTOR_PROFILE_DIR: /app/browser-profile
+      COLLECTOR_OUTPUT_PATH: /app/data/collector-awards.json
+      COLLECTOR_DEBUG_DIR: /app/data/collector-debug
+      COLLECTOR_NAVIGATION_TIMEOUT_MS: ${COLLECTOR_NAVIGATION_TIMEOUT_MS:-45000}
+      COLLECTOR_ACTION_DELAY_MS: ${COLLECTOR_ACTION_DELAY_MS:-1500}
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro

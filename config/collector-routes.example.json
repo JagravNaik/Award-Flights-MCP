@@ -1,0 +1,10 @@
+[
+  {
+    "origin": "JFK",
+    "destination": "LHR",
+    "startDate": "2026-06-20",
+    "endDate": "2026-06-20",
+    "cabins": ["business"],
+    "passengers": 1
+  }
+]
