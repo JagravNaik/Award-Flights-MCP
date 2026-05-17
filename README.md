@@ -129,6 +129,26 @@ HTTP endpoint:
 http://localhost:3000/mcp
 ```
 
+## Prefect Horizon
+
+Horizon Deploy expects a Python FastMCP server object. This repo includes a Horizon-compatible entrypoint in `horizon_server.py` that runs without credentials and exposes the award-search, planning, transfer-bonus, alert, hotel, seat-map, fare-class, wallet, and history tools from JSON feeds.
+
+Use these values in the Horizon form:
+
+```text
+Server name: award-flights-mcp
+Entrypoint: horizon_server.py:mcp
+Description: Credential-free award flight search MCP server with public JSON feeds, transfer bonuses, alerts, and award planning tools.
+```
+
+Horizon will install Python dependencies from `requirements.txt`. The deployed MCP endpoint will be:
+
+```text
+https://award-flights-mcp.fastmcp.app/mcp
+```
+
+The Node/TypeScript server entrypoint is still `dist/index.js` after `npm run build`; Docker runs `node dist/index.js`. Use the Python entrypoint only for Horizon's `server.py:mcp` style deployment flow.
+
 ## Configuration
 
 Environment variables:
