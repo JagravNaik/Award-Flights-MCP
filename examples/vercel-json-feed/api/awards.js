@@ -15,6 +15,7 @@ export default async function handler(request, response) {
   const endDate = url.searchParams.get("endDate") ?? date;
   const cabin = normalize(url.searchParams.get("cabin"));
   const programs = splitList(url.searchParams.get("programs"));
+  const liveEnabledForRequest = readBool(url.searchParams.get("live"), true);
 
   const localResults = awards.results.filter((award) => {
     return matches(origin, award.origin) &&
@@ -26,7 +27,7 @@ export default async function handler(request, response) {
   const warnings = [];
   const liveResults = [];
 
-  if (awardFlightDailyEnabled && origin && destination && (startDate || date)) {
+  if (awardFlightDailyEnabled && liveEnabledForRequest && origin && destination && (startDate || date)) {
     try {
       liveResults.push(...await searchAwardFlightDaily({
         origin,
@@ -50,7 +51,8 @@ export default async function handler(request, response) {
     sources: {
       "award-flight-daily": {
         enabled: awardFlightDailyEnabled,
-        attempted: awardFlightDailyEnabled && Boolean(origin && destination && (startDate || date)),
+        attempted: awardFlightDailyEnabled && liveEnabledForRequest && Boolean(origin && destination && (startDate || date)),
+        suppressedByRequest: awardFlightDailyEnabled && !liveEnabledForRequest,
         resultCount: liveResults.length
       },
       "static-json": {

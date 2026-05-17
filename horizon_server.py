@@ -1084,7 +1084,7 @@ def _run_award_search(search: dict[str, Any], started: float) -> dict[str, Any]:
             adapters_used.append("award-flight-daily")
             results.extend(afd_results)
         else:
-            skipped.append(_source_skip("award-flight-daily", "No normalized Award Flight Daily results."))
+            skipped.append(_source_skip("award-flight-daily", _source_skip_message(afd_warnings, "No normalized Award Flight Daily results."), health=_source_health(afd_warnings)))
     else:
         skipped.append(_source_skip("award-flight-daily", "Disabled or missing AWARD_FLIGHT_DAILY_MCP_URL.", health="disabled"))
 
@@ -1104,7 +1104,7 @@ def _run_award_search(search: dict[str, Any], started: float) -> dict[str, Any]:
             adapters_used.append("public-award-feed")
             results.extend(public_results)
         else:
-            skipped.append(_source_skip("public-award-feed", "No matching public feed results."))
+            skipped.append(_source_skip("public-award-feed", _source_skip_message(public_warnings, "No matching public feed results."), health=_source_health(public_warnings)))
     else:
         skipped.append(_source_skip("public-award-feed", "Disabled or missing PUBLIC_AWARD_FEED_URL.", health="disabled"))
 
@@ -1436,6 +1436,7 @@ def _build_public_queries(search: dict[str, Any]) -> list[dict[str, str]]:
                         "cabin": cabin,
                         "passengers": str(search["passengers"]),
                         "programs": ",".join(search.get("programs") or []),
+                        "live": "false",
                     }
                     base_queries.append(query)
                     if len(base_queries) >= max_queries:
@@ -1998,6 +1999,19 @@ def _source_skip(source_id: str, message: str, health: str = "ready") -> dict[st
         "supportsBatch": source_id == "local-award-feed",
         "supportsExplore": source_id != "award-flight-daily",
     }
+
+
+def _source_skip_message(warnings: list[str], fallback: str) -> str:
+    return warnings[0] if warnings else fallback
+
+
+def _source_health(warnings: list[str]) -> str:
+    text = " ".join(warnings).lower()
+    if any(token in text for token in ["rate limit", "rate-limit", "limit reached", "too many requests", "429"]):
+        return "rate_limited"
+    if any(token in text for token in ["access denied", "unauthorized", "forbidden", "401", "403"]):
+        return "error"
+    return "ready"
 
 
 def _active_on(bonus: dict[str, Any], date: str) -> bool:
