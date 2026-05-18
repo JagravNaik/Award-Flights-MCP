@@ -147,10 +147,22 @@ LOCAL_AWARD_FEED_PATH=/app/data/collector-awards.json docker compose up --build 
 
 Configure routes in `config/collector-routes.example.json` or point `COLLECTOR_ROUTES_PATH` at your own mounted JSON file. You can also use `COLLECTOR_ROUTES_JSON` or `COLLECTOR_ORIGIN`, `COLLECTOR_DESTINATION`, `COLLECTOR_START_DATE`, and `COLLECTOR_END_DATE`.
 
+Set `COLLECTOR_ADAPTERS=all` to search every supported program collector. You can also pass a comma-separated subset when a site is slow or you want to focus on a specific alliance.
+
 Current collector adapters:
 
+- `united-mileageplus`: United MileagePlus official search for United, Star Alliance, and MileagePlus partner awards.
+- `american-aadvantage`: American AAdvantage official search for American, oneworld, and AAdvantage partner awards.
+- `delta-skymiles`: Delta SkyMiles official award-search flow for Delta, SkyTeam, and SkyMiles partner awards.
+- `air-canada-aeroplan`: Air Canada Aeroplan official search for Air Canada, Star Alliance, and Aeroplan partner awards.
+- `flying-blue`: Air France-KLM Flying Blue official reward flow for Air France, KLM, SkyTeam, and Flying Blue partner awards.
+- `alaska-mileage-plan`: Alaska Mileage Plan official search for Alaska, oneworld, and Mileage Plan partner awards.
+- `qantas-frequent-flyer`: Qantas Frequent Flyer Classic Flight Reward flow for Qantas and oneworld partner awards.
+- `emirates-skywards`: Emirates Skywards official reward flow.
 - `ba-reward-flight-finder`: best-effort no-login BA reward flight finder collection; reports holding-page/timeouts instead of bypassing controls.
 - `virgin-reward-seat-checker`: no-login Virgin Atlantic Reward Seat Checker collection, including rendered monthly calendar points.
+
+These sources together cover the major booking programs and alliance surfaces rather than only BA and Virgin. Some airline sites require login for complete award results or change their JavaScript flows frequently; those adapters still save diagnostics and debug screenshots so site-specific parsers can be hardened over time.
 
 This collector is intentionally conservative: it does not bypass captchas, evade bot defenses, rotate proxies, or automate credential misuse. Keep it private, run it slowly, and use it only for searches you are authorized to perform. If a site changes its UI, debug screenshots and HTML are written under `data/collector-debug`.
 

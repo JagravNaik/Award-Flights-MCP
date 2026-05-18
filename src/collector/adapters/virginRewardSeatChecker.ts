@@ -14,6 +14,11 @@ import {
 export const virginRewardSeatCheckerAdapter: BrowserCollectorAdapter = {
   id: "virgin-reward-seat-checker",
   name: "Virgin Atlantic Reward Seat Checker",
+  programs: ["Virgin Atlantic Flying Club"],
+  airlines: ["Virgin Atlantic"],
+  alliances: ["SkyTeam"],
+  requiresLogin: "no",
+  coverageNotes: "Searches Virgin Atlantic Flying Club reward-seat calendars on routes exposed by the public checker.",
   async collect({ context, route, config }) {
     const page = await context.newPage();
     page.setDefaultTimeout(config.navigationTimeoutMs);

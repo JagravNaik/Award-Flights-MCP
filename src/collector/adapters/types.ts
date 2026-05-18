@@ -4,6 +4,11 @@ import type { CollectedAward, CollectorConfig, CollectorRoute } from "../types.j
 export interface BrowserCollectorAdapter {
   id: string;
   name: string;
+  programs?: string[];
+  airlines?: string[];
+  alliances?: string[];
+  requiresLogin?: "no" | "optional" | "sometimes";
+  coverageNotes?: string;
   collect(input: BrowserCollectInput): Promise<BrowserCollectOutput>;
 }
 

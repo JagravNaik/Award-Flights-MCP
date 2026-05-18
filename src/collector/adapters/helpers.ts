@@ -8,6 +8,17 @@ export interface CapturedJson {
   payload: unknown;
 }
 
+export interface VisibleMileageTextInput {
+  source: string;
+  route: CollectorRoute;
+  program: string;
+  airline?: string;
+  bookingUrl: string;
+  text: string;
+  warning: string;
+  maxResults?: number;
+}
+
 export function captureJsonResponses(page: Page, maxResponses: number): CapturedJson[] {
   const captured: CapturedJson[] = [];
   page.on("response", (response) => {
@@ -102,18 +113,59 @@ export function normalizeCapturedAwards(captured: CapturedJson[], route: Collect
   return dedupe(normalized);
 }
 
+export function normalizeVisibleMileageText(input: VisibleMileageTextInput): CollectedAward[] {
+  const seen = new Map<string, CollectedAward>();
+  const regex = /(\d{1,3}(?:,\d{3})*|\d+(?:\.\d+)?)\s*(k)?\s*(?:miles|mile|mi|points|point|pts|avios)\b/gi;
+  for (const match of input.text.matchAll(regex)) {
+    const miles = parseMileage(match[1], match[2]);
+    if (miles === undefined || miles < 1_000 || miles > 2_000_000) {
+      continue;
+    }
+
+    const index = match.index ?? 0;
+    const context = input.text.slice(Math.max(0, index - 100), Math.min(input.text.length, index + match[0].length));
+    const inferredCabin = inferNearestCabin(context);
+    const cabin = inferredCabin ?? (input.route.cabins?.length === 1 ? input.route.cabins[0] : undefined);
+    if (input.route.cabins?.length && cabin && !input.route.cabins.includes(cabin)) {
+      continue;
+    }
+
+    const id = stableId([input.source, input.route.origin, input.route.destination, input.route.startDate, cabin, miles]);
+    seen.set(id, {
+      id,
+      source: input.source,
+      source_updated_at: new Date().toISOString(),
+      program: input.program,
+      airline: input.airline,
+      origin: input.route.origin,
+      destination: input.route.destination,
+      date: input.route.startDate,
+      cabin,
+      miles,
+      booking_url: input.bookingUrl,
+      raw: { text: context.trim() },
+      warnings: [input.warning]
+    });
+
+    if (seen.size >= (input.maxResults ?? 20)) {
+      break;
+    }
+  }
+  return [...seen.values()];
+}
+
 export function normalizeCabin(value: unknown): CollectorCabin | undefined {
   const normalized = String(value ?? "").trim().toLowerCase().replace(/[_-]+/g, " ");
-  if (["y", "eco", "economy", "main cabin", "coach"].includes(normalized)) {
+  if (["y", "eco", "economy", "main cabin", "coach"].includes(normalized) || /\b(economy|main cabin|coach|basic)\b/.test(normalized)) {
     return "economy";
   }
-  if (["w", "premium", "premium economy", "world traveller plus", "premium plus"].includes(normalized)) {
+  if (["w", "premium", "premium economy", "world traveller plus", "premium plus"].includes(normalized) || /\b(premium economy|premium plus|world traveller plus)\b/.test(normalized)) {
     return "premium";
   }
-  if (["j", "business", "club", "club world", "upper class"].includes(normalized)) {
+  if (["j", "business", "club", "club world", "upper class"].includes(normalized) || /\b(business|club world|upper class|polaris|delta one)\b/.test(normalized)) {
     return "business";
   }
-  if (["f", "first", "first class"].includes(normalized)) {
+  if (["f", "first", "first class"].includes(normalized) || /\b(first|first class)\b/.test(normalized)) {
     return "first";
   }
   return undefined;
@@ -247,6 +299,30 @@ function readTaxes(record: Record<string, unknown>): CollectedAward["taxes"] | u
   }
   const amount = readNumber(record, ["taxes", "fees", "surcharges"]);
   return amount === undefined ? undefined : { amount, currency: readString(record, ["currency", "currencyCode"]) ?? "USD" };
+}
+
+function parseMileage(value: string, suffix: string | undefined): number | undefined {
+  const parsed = Number(value.replaceAll(",", ""));
+  if (!Number.isFinite(parsed)) {
+    return undefined;
+  }
+  return Math.round(suffix ? parsed * 1_000 : parsed);
+}
+
+function inferNearestCabin(value: string): CollectorCabin | undefined {
+  const lower = value.toLowerCase();
+  const rawCandidates: Array<{ cabin: CollectorCabin; index: number }> = [
+    { cabin: "economy", index: maxIndex(lower, ["economy", "main cabin", "coach", "basic"]) },
+    { cabin: "premium", index: maxIndex(lower, ["premium economy", "premium plus", "world traveller plus", "premium"]) },
+    { cabin: "business", index: maxIndex(lower, ["business", "club world", "upper class", "polaris", "delta one"]) },
+    { cabin: "first", index: maxIndex(lower, ["first class", "first"]) }
+  ];
+  const candidates = rawCandidates.filter((candidate) => candidate.index >= 0);
+  return candidates.sort((left, right) => right.index - left.index)[0]?.cabin;
+}
+
+function maxIndex(value: string, terms: string[]): number {
+  return Math.max(...terms.map((term) => value.lastIndexOf(term)));
 }
 
 function stableId(parts: Array<string | number | undefined>): string {

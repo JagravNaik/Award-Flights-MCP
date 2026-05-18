@@ -4,7 +4,7 @@ import type { CollectorConfig, CollectorRoute } from "./types.js";
 
 export function loadCollectorConfig(env: NodeJS.ProcessEnv = process.env): CollectorConfig {
   return {
-    adapters: readList(env.COLLECTOR_ADAPTERS, ["ba-reward-flight-finder", "virgin-reward-seat-checker"]),
+    adapters: readList(env.COLLECTOR_ADAPTERS, ["all"]),
     routes: readRoutes(env),
     headless: readBool(env.COLLECTOR_HEADLESS, true),
     intervalMinutes: readInt(env.COLLECTOR_INTERVAL_MINUTES, 0),

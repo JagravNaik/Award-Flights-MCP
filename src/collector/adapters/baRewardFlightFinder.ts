@@ -11,6 +11,11 @@ import {
 export const baRewardFlightFinderAdapter: BrowserCollectorAdapter = {
   id: "ba-reward-flight-finder",
   name: "British Airways Reward Flight Finder",
+  programs: ["British Airways Executive Club"],
+  airlines: ["British Airways"],
+  alliances: ["oneworld"],
+  requiresLogin: "no",
+  coverageNotes: "Searches BA Avios reward availability on routes exposed by BA's public reward flight finder.",
   async collect({ context, route, config }) {
     const page = await context.newPage();
     page.setDefaultTimeout(config.navigationTimeoutMs);
